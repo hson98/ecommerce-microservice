@@ -1,0 +1,65 @@
+//protoc proto/user.proto --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package userService;
+option go_package = ".;userService";
+
+
+service UserService{
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc GetUserByID(GetUserByIdRequest) returns (GetUserByIdResponse);
+    rpc GetMe(GetUserByIdRequest) returns(GetMeResponse);
+}
+message User {
+    string uuid=1;
+    string first_name=2;
+    string last_name=3;
+    string password = 4;
+    string email=5;
+    string role=6;
+    google.protobuf.Timestamp created_at=7;
+    google.protobuf.Timestamp updated_at=8;
+}
+message RegisterRequest {
+    string email = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string password = 4;
+    string role = 5;
+}
+message RegisterResponse {
+    User user = 1;
+    string access_token = 2;
+    google.protobuf.Timestamp access_token_expires_at=3;
+    string refresh_token = 4;
+    google.protobuf.Timestamp refresh_token_expires_at=5;
+
+}
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+
+
+message LoginResponse {
+    User user = 1;
+    string access_token = 2;
+    google.protobuf.Timestamp access_token_expires_at=3;
+    string refresh_token = 4;
+    google.protobuf.Timestamp refresh_token_expires_at=5;
+}
+
+message GetUserByIdRequest {
+    string Id = 1;
+}
+message GetUserByIdResponse {
+    User user = 1;
+}
+
+message GetMeRequest{
+}
+message GetMeResponse{
+    User user=1;
+}
