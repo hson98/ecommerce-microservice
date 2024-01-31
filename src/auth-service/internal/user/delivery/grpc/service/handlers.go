@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/hson98/ecommerce-microservice/src/auth-service/models"
+	"github.com/hson98/ecommerce-microservice/src/auth-service/internal/models"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/grpcerrs"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/myjwt"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/utils"
@@ -132,7 +132,6 @@ func (u *usersService) userModelToProto(user *models.User) *userService.User {
 		Uuid:      user.ID.String(),
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		Password:  user.Password,
 		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: timestamppb.New(user.CreatedAt),

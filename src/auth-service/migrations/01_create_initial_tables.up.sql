@@ -17,6 +17,6 @@ CREATE TABLE users
     password   VARCHAR(250)             NOT NULL CHECK ( octet_length(password) <> 0 ),
     role       role                     NOT NULL DEFAULT 'user',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE          DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE          DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE          DEFAULT NULL
 );

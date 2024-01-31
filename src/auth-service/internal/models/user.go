@@ -13,7 +13,7 @@ type User struct {
 	Password  string    `json:"-"`
 	FirstName string    `json:"first_name" validate:"required,lte=30"`
 	LastName  string    `json:"last_name" validate:"required,lte=30"`
-	Role      string    `json:"role"`
+	Role      string    `json:"role" gorm:"default:user"`
 	Base
 }
 

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/config"
+	"github.com/hson98/ecommerce-microservice/src/auth-service/internal/models"
 	user_repository "github.com/hson98/ecommerce-microservice/src/auth-service/internal/user/repository"
-	"github.com/hson98/ecommerce-microservice/src/auth-service/models"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/httperrs"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/myjwt"
 	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/utils"
@@ -19,36 +19,36 @@ type UseCase interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
 }
 
-type authUC struct {
-	authRepo user_repository.Repository
+type userUC struct {
+	userRepo user_repository.Repository
 	config   *config.Config
 	jwtMaker myjwt.Maker
 }
 
-func NewAuthUC(authRepo user_repository.Repository, config *config.Config, jwtMaker myjwt.Maker) UseCase {
-	return &authUC{
-		authRepo: authRepo,
+func NewUserUC(userRepo user_repository.Repository, config *config.Config, jwtMaker myjwt.Maker) UseCase {
+	return &userUC{
+		userRepo: userRepo,
 		config:   config,
 		jwtMaker: jwtMaker,
 	}
 }
 
-func (a *authUC) Login(ctx context.Context, userLogin *models.User) (*models.UserToken, error) {
-	findUser, err := a.authRepo.FindUser(ctx, map[string]interface{}{"email": userLogin.Email})
+func (u *userUC) Login(ctx context.Context, userLogin *models.User) (*models.UserToken, error) {
+	findUser, err := u.userRepo.FindUser(ctx, map[string]interface{}{"email": userLogin.Email})
 	if err != nil {
-		return nil, errors.New(httperrs.ErrUsernameOrPasswordInvalid)
+		return nil, errors.New(httperrs.ErrEmailOrPasswordInvalid)
 	}
 	errCompare := utils.CheckPassword(findUser.Password, userLogin.Password)
 	if errCompare != nil {
-		return nil, errors.New(httperrs.ErrUsernameOrPasswordInvalid)
+		return nil, errors.New(httperrs.ErrEmailOrPasswordInvalid)
 	}
 	//create access token
-	accessToken, accessPayload, err := CreateToken(ctx, a, findUser.ID, a.config.AccessTokenDuration)
+	accessToken, accessPayload, err := CreateToken(ctx, u, findUser.ID, u.config.Server.AccessTokenDuration)
 	if err != nil {
 		return nil, err
 	}
 	//create refresh token
-	refreshToken, refreshPayload, err := CreateToken(ctx, a, findUser.ID, a.config.RefreshTokenDuration)
+	refreshToken, refreshPayload, err := CreateToken(ctx, u, findUser.ID, u.config.Server.RefreshTokenDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -60,16 +60,16 @@ func (a *authUC) Login(ctx context.Context, userLogin *models.User) (*models.Use
 		User:                  findUser,
 	}, nil
 }
-func CreateToken(c context.Context, a *authUC, idUser uuid.UUID, duration time.Duration) (string, *myjwt.Payload, error) {
+func CreateToken(c context.Context, u *userUC, idUser uuid.UUID, duration time.Duration) (string, *myjwt.Payload, error) {
 	//Create token
-	token, payload, err := a.jwtMaker.CreateToken(idUser, duration)
+	token, payload, err := u.jwtMaker.CreateToken(idUser, duration)
 	if err != nil {
 		return "", nil, err
 	}
 	return token, payload, nil
 }
-func (a *authUC) Register(ctx context.Context, dataUser *models.User) (*models.UserToken, error) {
-	user, _ := a.authRepo.FindUser(ctx, map[string]interface{}{"email": dataUser.Email})
+func (u *userUC) Register(ctx context.Context, dataUser *models.User) (*models.UserToken, error) {
+	user, _ := u.userRepo.FindUser(ctx, map[string]interface{}{"email": dataUser.Email})
 	if user != nil {
 		return nil, errors.New(httperrs.ErrEmailExisted)
 	}
@@ -80,17 +80,17 @@ func (a *authUC) Register(ctx context.Context, dataUser *models.User) (*models.U
 	if err != nil {
 		return nil, err
 	}
-	userCreated, err := a.authRepo.CreateUser(ctx, dataUser)
+	userCreated, err := u.userRepo.CreateUser(ctx, dataUser)
 	if err != nil {
 		return nil, err
 	}
 	//create access token
-	accessToken, accessPayload, err := CreateToken(ctx, a, userCreated.ID, a.config.AccessTokenDuration)
+	accessToken, accessPayload, err := CreateToken(ctx, u, userCreated.ID, u.config.Server.AccessTokenDuration)
 	if err != nil {
 		return nil, err
 	}
 	//create refresh token
-	refreshToken, refreshPayload, err := CreateToken(ctx, a, userCreated.ID, a.config.RefreshTokenDuration)
+	refreshToken, refreshPayload, err := CreateToken(ctx, u, userCreated.ID, u.config.Server.RefreshTokenDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +103,6 @@ func (a *authUC) Register(ctx context.Context, dataUser *models.User) (*models.U
 	}, nil
 }
 
-func (a *authUC) GetUserByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	return a.authRepo.FindUser(ctx, map[string]interface{}{"id": userID.String()})
+func (u *userUC) GetUserByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	return u.userRepo.FindUser(ctx, map[string]interface{}{"id": userID.String()})
 }

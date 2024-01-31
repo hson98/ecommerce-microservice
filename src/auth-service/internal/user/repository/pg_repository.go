@@ -3,7 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/hson98/ecommerce-microservice/src/auth-service/models"
+	"github.com/hson98/ecommerce-microservice/src/auth-service/internal/models"
 	"gorm.io/gorm"
 )
 

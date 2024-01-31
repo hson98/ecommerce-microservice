@@ -1,65 +1,77 @@
 package config
 
 import (
+	"fmt"
+	"github.com/hson98/ecommerce-microservice/src/auth-service/pkg/constants"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"os"
 	"time"
 )
 
 type Config struct {
-	Port                 string        `mapstructure:"PORT"`
-	DBUser               string        `mapstructure:"DB_USER"`
-	DBPass               string        `mapstructure:"DB_PASS"`
-	DBName               string        `mapstructure:"DB_NAME"`
-	DBHost               string        `mapstructure:"DB_HOST"`
-	DBPort               string        `mapstructure:"DB_PORT"`
-	RedisHost            string        `mapstructure:"REDIS_HOST"`
-	RedisPass            string        `mapstructure:"REDIS_PASS"`
-	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
-	SecretKeyJWT         string        `mapstructure:"SECRET_KEY"`
-	Logger               Logger
-	Server               ServerConfig
+	Logger  Logger       `mapstructure:"logger"`
+	Server  ServerConfig `mapstructure:"server"`
+	Metrics Metrics      `mapstructure:"metrics"`
+	Jaeger  Jaeger       `mapstructure:"jaeger"`
 }
 
 type Logger struct {
-	Development       bool
-	DisableCaller     bool
-	DisableStacktrace bool
-	Encoding          string
-	Level             string
+	Development       bool   `mapstructure:"development"`
+	DisableCaller     bool   `mapstructure:"disableCaller"`
+	DisableStacktrace bool   `mapstructure:"disableStacktrace"`
+	Encoding          string `mapstructure:"encoding"`
+	Level             string `mapstructure:"level"`
+}
+type Metrics struct {
+	URL         string `mapstructure:"url"`
+	ServiceName string `mapstructure:"serviceName"`
+}
+
+// Jaeger
+type Jaeger struct {
+	Host        string `mapstructure:"host"`
+	ServiceName string `mapstructure:"serviceName"`
+	LogSpans    bool   `mapstructure:"logSpans"`
 }
 
 type ServerConfig struct {
-	AppVersion        string
-	Port              string
-	PprofPort         string
-	Mode              string
-	JwtSecretKey      string
-	CookieName        string
-	ReadTimeout       time.Duration
-	WriteTimeout      time.Duration
-	SSL               bool
-	CtxDefaultTimeout time.Duration
-	CSRF              bool
-	Debug             bool
-	MaxConnectionIdle time.Duration
-	Timeout           time.Duration
-	MaxConnectionAge  time.Duration
-	Time              time.Duration
+	AppVersion           string        `mapstructure:"appVersion"`
+	Mode                 string        `mapstructure:"mode"`
+	SSL                  bool          `mapstructure:"ssl"`
+	MaxConnectionIdle    time.Duration `mapstructure:"maxConnectionIdle"`
+	Timeout              time.Duration `mapstructure:"timeout"`
+	MaxConnectionAge     time.Duration `mapstructure:"maxConnectionAge"`
+	Port                 string        `mapstructure:"port"`
+	DBUser               string        `mapstructure:"dbUser"`
+	DBPass               string        `mapstructure:"dbPass"`
+	DBName               string        `mapstructure:"dbName"`
+	DBHost               string        `mapstructure:"dbHost"`
+	DBPort               string        `mapstructure:"dbBPort"`
+	AccessTokenDuration  time.Duration `mapstructure:"accessTokenDuration"`
+	RefreshTokenDuration time.Duration `mapstructure:"refreshTokenDuration"`
+	SecretKeyJWT         string        `mapstructure:"secretKeyJWT"`
 }
 
-func LoadConfig(path string, name string) (config *Config, err error) {
-	if err != nil {
-		return nil, err
+func LoadConfig(configPath string) (config *Config, err error) {
+	if configPath == "" {
+		getwd, err := os.Getwd()
+		if err != nil {
+			return nil, errors.Wrap(err, "os.Getwd")
+		}
+		configPath = fmt.Sprintf("%s/config/config.yaml", getwd)
 	}
-	viper.AddConfigPath(path)
-	viper.SetConfigName(name)
-	viper.SetConfigType("env")
-	viper.AutomaticEnv()
-	err = viper.ReadInConfig()
-	if err != nil {
-		return nil, err
+	cfg := &Config{}
+
+	viper.SetConfigType(constants.Yaml)
+	viper.SetConfigFile(configPath)
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, errors.Wrap(err, "viper.ReadInConfig")
 	}
-	err = viper.Unmarshal(&config)
-	return config, nil
+
+	if err := viper.Unmarshal(cfg); err != nil {
+		return nil, errors.Wrap(err, "viper.Unmarshal")
+	}
+	return cfg, nil
 }

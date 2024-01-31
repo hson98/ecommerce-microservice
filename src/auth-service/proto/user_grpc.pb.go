@@ -25,7 +25,7 @@ type UserServiceClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	GetUserByID(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
-	GetMe(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetMeResponse, error)
+	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*GetMeResponse, error)
 }
 
 type userServiceClient struct {
@@ -63,7 +63,7 @@ func (c *userServiceClient) GetUserByID(ctx context.Context, in *GetUserByIdRequ
 	return out, nil
 }
 
-func (c *userServiceClient) GetMe(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetMeResponse, error) {
+func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*GetMeResponse, error) {
 	out := new(GetMeResponse)
 	err := c.cc.Invoke(ctx, "/userService.UserService/GetMe", in, out, opts...)
 	if err != nil {
@@ -73,17 +73,16 @@ func (c *userServiceClient) GetMe(ctx context.Context, in *GetUserByIdRequest, o
 }
 
 // UserServiceServer is the server API for UserService service.
-// All implementations must embed UnimplementedUserServiceServer
+// All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	GetUserByID(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
-	GetMe(context.Context, *GetUserByIdRequest) (*GetMeResponse, error)
-	mustEmbedUnimplementedUserServiceServer()
+	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
 }
 
-// UnimplementedUserServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedUserServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedUserServiceServer struct {
 }
 
@@ -96,10 +95,9 @@ func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*Lo
 func (UnimplementedUserServiceServer) GetUserByID(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserByID not implemented")
 }
-func (UnimplementedUserServiceServer) GetMe(context.Context, *GetUserByIdRequest) (*GetMeResponse, error) {
+func (UnimplementedUserServiceServer) GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMe not implemented")
 }
-func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
 // UnsafeUserServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to UserServiceServer will
@@ -167,7 +165,7 @@ func _UserService_GetUserByID_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserByIdRequest)
+	in := new(GetMeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -179,7 +177,7 @@ func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/userService.UserService/GetMe",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetMe(ctx, req.(*GetUserByIdRequest))
+		return srv.(UserServiceServer).GetMe(ctx, req.(*GetMeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

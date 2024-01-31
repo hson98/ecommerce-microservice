@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	ErrUsernameOrPasswordInvalid = "email or password is incorrect"
-	PasswordInvalid              = "invalid password"
-	ErrEmailExisted              = "email already exists"
-	CanNotSaveToStorage          = "an error occurred while storing data"
-	PassAndConfirmPassNotMatch   = "password does not match the confirmed password"
-	HasErrTryAgain               = "an error has occurred, please try again later!"
-	ErrBody                      = "error body"
+	ErrEmailOrPasswordInvalid  string = "email or password is incorrect"
+	PasswordInvalid                   = "invalid password"
+	ErrEmailExisted                   = "email already exists"
+	CanNotSaveToStorage               = "an error occurred while storing data"
+	PassAndConfirmPassNotMatch        = "password does not match the confirmed password"
+	HasErrTryAgain                    = "an error has occurred, please try again later!"
+	ErrBody                           = "error body"
 )
 
 var (
