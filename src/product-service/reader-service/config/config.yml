@@ -1,0 +1,29 @@
+logger:
+  development: true
+  disableCaller: false
+  disableStacktrace: false
+  encoding: json
+  level: info
+server:
+  appVersion: 1.0.0
+  mode: Development
+  ssl: true
+  maxConnectionIdle: 5
+  timeout: 15
+  maxConnectionAge: 5
+  port: :8080
+  dbUser: postgres
+  dbPass: postgres
+  dbName: auth_db
+  dbHost: localhost
+  dbBPort: 5435
+  accessTokenDuration: 15m
+  refreshTokenDuration: 24h
+  secretKeyJWT: your_secretKeyJWT_value123_1234567890
+metrics:
+  url: 0.0.0.0:7070
+  serviceName: auth_microservice
+jaeger:
+  host: localhost:6831
+  serviceName: Auth_GRPC
+  logSpans: false
